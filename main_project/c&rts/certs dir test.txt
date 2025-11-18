@@ -1,0 +1,11 @@
+certs_dir_test
+#Todos os Certs estao salvos no drive.
+#Excluir estes dados
+ca
+https://bit.ly/4i52LNj
+
+ta
+https://bit.ly/49mtHFV
+
+client key
+https://bit.ly/4rc42pW
