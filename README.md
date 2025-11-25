@@ -1,4 +1,4 @@
-Please, run Install_OpenVPN_EasyRSA.py script with Sudo. This should be enough to set your server listenning on 1194.
+Please, run Install_OpenVPN_EasyRSA.py script with Sudo. This should be enough to set your server listenning on 1194. (SELECT YES FOR SURICATA IDS AT END :)
 
 - Ensure with you Internet Provider to redirect this traffic to this port and set a staticl LAN Ipv4 for the server.
 
@@ -10,7 +10,7 @@ Please, run Install_OpenVPN_EasyRSA.py script with Sudo. This should be enough t
 
 - The OVPN File will be generated in the same Path of ./Scripts folder.
 
-- If you want, Install suri_openVPN.py to have a silly alert when someone connects to your VPN. I will refine this.. add a callmebot notification also. Be patient. 
+- If you want, Install Suricata you will have a silly alert when someone connects to your VPN. I will refine this.. add a callmebot notification also. Be patient. 
 
 TESTED AND WORKED ON:
 

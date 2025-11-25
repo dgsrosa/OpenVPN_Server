@@ -192,5 +192,29 @@ run(f"sudo bash {validar_ovpn_path}")
 # Executar validação dos arquivos .ovpn
 run(f"sudo bash ./wakeup_VPN_config.sh")
 
+
+def SuriInstall():
+    print("Do you want to install Suricata IDS? (yes/no)")
+    choice = input("> ").strip().lower()
+
+    if choice in ["yes", "y"]:
+        script_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "..", "Suri_OpenVPN_Alert", "suri_openVPN.py"
+        )
+        script_path = os.path.normpath(script_path)
+
+        if os.path.exists(script_path):
+            print(f"Running Suricata installer: {script_path}")
+            subprocess.run(["python3", script_path], check=True)
+        else:
+            print("Error: Suricata script not found at", script_path)
+    else:
+        print("Suricata installation skipped.")
+
+if __name__ == "__main__":
+    SuriInstall()
+
+
 print("\n✅ DOne EnJoY.")
 

@@ -9,29 +9,16 @@ def run(cmd, cwd=None):
 run("sudo apt update")
 run("sudo apt install geoip-database -y suricata -y")
 
-#Open That:
+# Copiando arquivos de configuração do Suricata
 
-with open("/etc/suricata/rules/local.rules", "w") as f:
-	f.write('alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN new connection attempt"; flow:to_server; threshold:type limit, track by_src, count 1, seconds 60; sid:1000013; rev:1;)')
-print("Local rules file created at /etc/suricata/rules/local.rules")
-		
-		
+config_dir = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..", "Config"
+)
+config_dir = os.path.normpath(config_dir)
 
-# Atualizar Suricata.yaml.
-with open("/etc/suricata/suricata.yaml", "r") as infile, open("/etc/suricata/suricata_modified.yaml", "w") as outfile:
-    for line in infile:
-        # Write the original line
-        outfile.write(line)
-        # If we find the alert block, insert geoip: true with correct indentation
-        if line.strip() == "- alert:":
-            # Add 2 spaces indentation (YAML requires spaces, not tabs)
-            outfile.write("      geoip: true\n")
-		if line.strip() == "- Rules:":
-			# Comment original rules line
-			outfile.write("#      - /etc/suricata/rules/\n")
-			# Add local rules line
-			outfile.write("      - /etc/suricata/rules/local.rules\n")
-		
+run(f"sudo cp {os.path.join(config_dir, 'local.rules')} /etc/suricata/rules/")
+run(f"sudo cp {os.path.join(config_dir, 'suricata.yaml')} /etc/suricata/")
 
 # Adicionando o Servico do Suricata ao Systemctl
 
