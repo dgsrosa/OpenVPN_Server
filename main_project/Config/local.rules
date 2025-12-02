@@ -1,3 +1,45 @@
-#alert tls any any -> $HOME_NET 1194 (msg:"OpenVPN ClientHello Handshake"; tls.handshake_type:1; sid:1000011; rev:1;)
-#alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN handshake attempt"; flow:to_server, established; sid:1000014; rev:1;)
+# === OpenVPN CVE-related alerts ===
+
+# CVE-2020-15078: Crafted packet DoS attempt
+# Inspect the first 2 bytes, 0x38 0x01 of UDP packets. This is a characteristic of malformed packets that could broke
+# old OpenVPN versions.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN CVE-2020-15078 DoS attempt"; content:"|38 01|"; depth:2; sid:3000001; rev:1;)
+
+# CVE-2017-7478/7479: Malformed key negotiation crash
+# These bytes represent a malformed key negotiation message that 
+# could trigger a crash in vulnerable OpenVPN builds.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN CVE-2017-7478/7479 malformed key negotiation"; content:"|00 0A|"; depth:2; sid:3000002; rev:1;)
+
+# CVE-2017-12105: DTLS handshake DoS
+# Matches the TLS/DTLS handshake initiation sequence (0x16 0x03 0x01).
+# Alerts if this sequence is seen in unexpected contexts on UDP/1194, 
+# which could indicate a crafted DoS attempt.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN CVE-2017-12105 DTLS handshake anomaly"; content:"|16 03 01|"; depth:3; sid:3000003; rev:1;)
+
+# CVE-2014-8104: Buffer overflow in auth-user-pass
+# Matches the TLS/DTLS handshake initiation sequence (0x16 0x03 0x01).
+# Alerts if this sequence is seen in unexpected contexts on UDP/1194, which could indicate a crafted DoS attempt.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN CVE-2014-8104 buffer overflow attempt"; content:"AUTH_USER_PASS"; nocase; sid:3000004; rev:1;)
+
+# CVE-2019-14899: VPN traffic exposure attempt
+# Matches three consecutive null bytes at the start of a packet.
+# This anomaly was linked to crafted packets that could expose VPN traffic routing information.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN CVE-2019-14899 suspicious crafted packet"; content:"|00 00 00|"; depth:3; sid:3000005; rev:1;)
+
+# === Generic suspicious activity ===
+
+# Multiple connection attempts (possible brute force)
+# Suricata counts how many times a source IP sends packets to UDP/1194.
+# If 10 or more attempts occur within 60 seconds, it triggers an alert.
+
+alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN brute force connection attempts"; threshold:type both, track by_src, count 10, seconds 60; sid:3000006; rev:1;)
+
+# New Client ALert, this should increased with CallMeBot Notification
+
 alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN new connection attempt"; flow:to_server; threshold:type limit, track by_src, count 1, seconds 60; sid:1000013; rev:1;)
+

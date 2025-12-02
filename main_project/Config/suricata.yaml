@@ -2192,7 +2192,13 @@ default-rule-path: /var/lib/suricata/rules
 rule-files:
  # - suricata.rules
   - /etc/suricata/rules/local.rules
-
+  - /etc/suricata/rules/dns-events.rules
+  - /etc/suricata/rules/http-events.rules
+  - /etc/suricata/rules/ssh-events.rules
+  - /etc/suricata/rules/ftp-events.rules
+  - /etc/suricata/rules/dhcp-events.rules
+  - /etc/suricata/rules/decoder-events.rules
+  - /etc/suricata/rules/smtp-events.rules
 
 ##
 ## Auxiliary configuration files.

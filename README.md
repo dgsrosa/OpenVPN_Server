@@ -10,7 +10,10 @@ Please, run Install_OpenVPN_EasyRSA.py script with Sudo. This should be enough t
 
 - The OVPN File will be generated in the same Path of ./Scripts folder.
 
-- If you want, Install Suricata you will have a silly alert when someone connects to your VPN. I will refine this.. add a callmebot notification also. Be patient. 
+- If you want, Install Suricata IDS to inspect eth0.
+
+- I used "[Scapy](https://github.com/secdev/scapy): Python-based interactive packet manipulation library" for testing Suricata Rules. There is another branch created only for tests, "scapy-Suri-tests.py".
+
 
 TESTED AND WORKED ON:
 
