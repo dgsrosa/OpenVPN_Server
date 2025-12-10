@@ -8,6 +8,8 @@ def run(cmd, cwd=None):
 # Atualizar e instalar pacotes
 run("sudo apt update")
 run("sudo apt install geoip-database -y suricata -y")
+run("sudo apt install jq -y")
+
 
 # Copiando arquivos de configuração do Suricata
 
@@ -31,7 +33,7 @@ Description=Suricata Intrusion Detection Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml -i eth0
+ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml --af-packet
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
@@ -48,7 +50,21 @@ with open(service_path, "w") as f:
 
 print(f"Service file written to {service_path}")
 
-# Reload systemd to recognize the new service
+# Adding DNS_Fetch to Suricata
+script_dir = os.path.dirname(os.path.abspath(__file__))
+dns_fetch_path = os.path.join(script_dir, "dns_fetch.sh")
+
+subprocess.run(["bash", dns_fetch_path], check=True)
+print("dns_fetch.sh script executed.")
+
+# Build cron job string: run every 3 hours
+cron_job = f"0 */3 * * * bash {os.path.dirname(os.path.abspath(__file__))}/dns_fetch.sh"
+
+# Install into root's crontab
+subprocess.run(f'(sudo crontab -l 2>/dev/null; echo "{cron_job}") | sudo crontab -', shell=True, check=True)
+print("Cron job for dns_fetch.sh added.")
+
+
 subprocess.run(["systemctl", "daemon-reload"], check=True)
 
 # Enable service to start at boot
