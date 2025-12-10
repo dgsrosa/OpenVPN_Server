@@ -3,6 +3,7 @@
 # Diretórios base
 PKI_DIR="$HOME/openvpn-ca/pki"
 TA_KEY="/etc/openvpn/ta.key"
+TLS_CRYPT_KEY="/etc/openvpn/tls-crypt.key"
 OUTPUT_DIR=""
 REMOTE_HOST=""
 PORTA=""
@@ -65,10 +66,9 @@ $(awk '/BEGIN/,/END/' "$CRT")
 $(cat "$KEY")
 </key>
 
-<tls-auth>
-$(cat "$TA_KEY")
-</tls-auth>
-key-direction 1
+<tls-crypt>
+$(awk '/BEGIN/,/END/' "$TLS_CRYPT_KEY")
+</tls-crypt>
 EOF
 
     echo "✔ Arquivo $CLIENTE.ovpn criado com sucesso em $OUTPUT_DIR"
