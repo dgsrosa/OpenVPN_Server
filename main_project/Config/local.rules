@@ -42,4 +42,3 @@ alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN brute force connection attempt
 # New Client ALert, this should increased with CallMeBot Notification
 
 alert udp any any -> $HOME_NET 1194 (msg:"OpenVPN new connection attempt"; flow:to_server; threshold:type limit, track by_src, count 1, seconds 60; sid:1000013; rev:1;)
-
