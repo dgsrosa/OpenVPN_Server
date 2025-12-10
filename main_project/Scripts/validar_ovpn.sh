@@ -2,6 +2,7 @@
 
 OVPN_DIR="$(dirname "$0")"
 TA_KEY="/etc/openvpn/ta.key"
+TLS_CRYPT_KEY="/etc/openvpn/tls-crypt.key"
 REMOTE_IP="YOUR_SERVER"
 PORTA="YOUR_PORT"
 PROTO="udp"
@@ -42,5 +43,15 @@ for FILE in "$OVPN_DIR"/*.ovpn; do
     echo "✔ tls-auth coincide com ta.key do servidor"
   else
     echo "❌ tls-auth diferente da ta.key do servidor"
+  fi
+
+    # Verifica se tls-acrypt bate com tls-crypt.key
+  CLIENT_TLS=$(awk '/<tls-crypt>/,/<\/tls-crypt>/' "$FILE" | grep -vE "<tls-crypt>|</tls-crypt>")
+  SERVER_TLS=$(grep -vE "^(#|$)" "$TLS_CRYPT_KEY")
+
+  if diff <(echo "$CLIENT_Tls") <(echo "$SERVER_TLS") >/dev/null; then
+    echo "✔ tls-crypt coincide com tls-crypt.key do servidor"
+  else
+    echo "❌ tls-crypt diferente da tls-crypt.key do servidor"
   fi
 done
