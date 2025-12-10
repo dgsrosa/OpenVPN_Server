@@ -26,6 +26,7 @@ cn = input("Nome Comum (eg: servidor1): ")
 # Atualizar e instalar pacotes
 run("sudo apt update")
 run("sudo apt install easy-rsa openvpn -y")
+run("sudo apt install iptables -y")
 
 # Evitando o Warning futuro para a substituiçao da PKI
 
@@ -52,7 +53,6 @@ with open(vars_path, "a") as f:
     f.write(f'set_var EASYRSA_REQ_OU         "{ou}"\n')
     f.write(f'set_var EASYRSA_REQ_CN         "{cn}"\n')
 
-
 # Gerar chave do servidor
 run("./easyrsa gen-req server nopass", cwd=easyrsa_dir)
 run("./easyrsa sign-req server server", cwd=easyrsa_dir)
@@ -61,6 +61,9 @@ run("./easyrsa gen-dh", cwd=easyrsa_dir)
 # Gerar chave ta.key
 run("mkdir -p keys", cwd=easyrsa_dir)
 run("openvpn --genkey secret keys/ta.key", cwd=easyrsa_dir)
+
+# Gerar TLS Crypt
+run("openvpn --genkey --secret tls-crypt.key", cwd=easyrsa_dir)
 
 # Gerar certificados de cliente
 try:
@@ -94,9 +97,9 @@ cert /etc/openvpn/server.crt
 key /etc/openvpn/server.key
 dh /etc/openvpn/dh.pem
 
-# TLS Auth (opcional, mas recomendado)
-tls-auth /etc/openvpn/ta.key 0
-key-direction 0
+# TLS Auth 
+#tls-auth /etc/openvpn/ta.key 0
+tls-crypt /etc/openvpn/tls-crypt.key
 
 # Segurança
 cipher AES-256-CBC
@@ -135,6 +138,7 @@ run("sudo cp ~/openvpn-ca/pki/issued/server.crt /etc/openvpn/")
 run("sudo cp ~/openvpn-ca/pki/private/server.key /etc/openvpn/")
 run("sudo cp ~/openvpn-ca/pki/dh.pem /etc/openvpn/")
 run("sudo cp ~/openvpn-ca/keys/ta.key /etc/openvpn/")
+run("sudo cp ~/openvpn-ca/tls-crypt.key /etc/openvpn/")
 
 # Atualizar gerar_ovpn_completo.sh com os valores informados
 gerar_ovpn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gerar_ovpn_completo.sh")
