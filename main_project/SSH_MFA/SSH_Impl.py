@@ -11,8 +11,9 @@ def main():
     
     # Step 4: Install Google Authenticator PAM module
     run_cmd("sudo apt install -y libpam-google-authenticator")
-    run_cmd("sudo -u dougl google-authenticator -t -d -f -r 3 -R 30 -w 3")
-    run_cmd("ls -la /home/dougl/.google_authenticator")
+    run_cmd("sudo -u $USER google-authenticator -t -d -f -r 3 -R 30 -w 3")
+    run_cmd("ls -la $HOME/.google_authenticator")
+
 
 
     # Step 6: Update PAM configuration
