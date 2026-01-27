@@ -1,8 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Diretórios base
 PKI_DIR="$HOME/openvpn-ca/pki"
-TA_KEY="/etc/openvpn/ta.key"
 TLS_CRYPT_KEY="/etc/openvpn/tls-crypt.key"
 OUTPUT_DIR=""
 REMOTE_HOST=""
@@ -17,12 +18,22 @@ if [[ -z "$OUTPUT_DIR" ]]; then
   exit 1
 fi
 
+if [[ -z "$REMOTE_HOST" || -z "$PORTA" ]]; then
+  echo "❌ Erro: REMOTE_HOST/PORTA não definidos"
+  exit 1
+fi
+
+if [[ ${#CLIENTES[@]} -eq 0 ]]; then
+  echo "❌ Erro: CLIENTES vazio (nenhum cliente para gerar)"
+  exit 1
+fi
+
 # Cria pasta de saída se não existir
 mkdir -p "$OUTPUT_DIR"
 
-# Verifica se ta.key existe e é legível
-if [[ ! -r "$TA_KEY" ]]; then
-  echo "❌ Erro: não foi possível ler $TA_KEY. Execute com sudo ou ajuste permissões."
+# Verifica se tls-crypt.key existe e é legível
+if [[ ! -r "$TLS_CRYPT_KEY" ]]; then
+  echo "❌ Erro: não foi possível ler $TLS_CRYPT_KEY. Execute com sudo ou ajuste permissões."
   exit 1
 fi
 
@@ -52,6 +63,7 @@ remote-cert-tls server
 dhcp-option DNS 8.8.8.8
 tun-mtu 1400
 mssfix 1360
+auth-nocache
 verb 3
 
 <ca>

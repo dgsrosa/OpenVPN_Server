@@ -1,3 +1,7 @@
 # Ignore a specific file
 sshd
 sshd_config
+
+# Python cache
+__pycache__/
+*.py[cod]
