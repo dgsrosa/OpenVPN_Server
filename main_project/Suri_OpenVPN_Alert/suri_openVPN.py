@@ -1,26 +1,39 @@
 import os
 import subprocess
+import sys
+from pathlib import Path
 
 def run(cmd, cwd=None):
     print(f"Executando: {cmd}")
-    subprocess.run(cmd, shell=True, cwd=cwd)
+    subprocess.run(cmd, shell=True, cwd=cwd, check=True)
+
+def require_root() -> None:
+    if os.name != "posix":
+        return
+    if hasattr(os, "geteuid") and os.geteuid() != 0:
+        print("Erro: execute este script com sudo (ex: sudo python3 suri_openVPN.py).", file=sys.stderr)
+        sys.exit(1)
+
+def install_cron_line(line: str) -> None:
+    result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+    current = result.stdout if result.returncode == 0 else ""
+    if line.strip() in {l.strip() for l in current.splitlines()}:
+        return
+    new_crontab = (current.rstrip("\n") + "\n" + line.rstrip("\n") + "\n") if current.strip() else (line.rstrip("\n") + "\n")
+    subprocess.run(["crontab", "-"], input=new_crontab, text=True, check=True)
 
 # Atualizar e instalar pacotes
+require_root()
 run("sudo apt update")
-run("sudo apt install geoip-database -y suricata -y")
-run("sudo apt install jq -y")
+run("sudo apt install -y geoip-database suricata jq")
 
 
 # Copiando arquivos de configuração do Suricata
 
-config_dir = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..", "Config"
-)
-config_dir = os.path.normpath(config_dir)
+config_dir = Path(__file__).resolve().parent.parent / "Config"
 
-run(f"sudo cp {os.path.join(config_dir, 'local.rules')} /etc/suricata/rules/")
-run(f"sudo cp {os.path.join(config_dir, 'suricata.yaml')} /etc/suricata/")
+subprocess.run(["cp", str(config_dir / "local.rules"), "/etc/suricata/rules/"], check=True)
+subprocess.run(["cp", str(config_dir / "suricata.yaml"), "/etc/suricata/"], check=True)
 
 # Adicionando o Servico do Suricata ao Systemctl
 
@@ -58,11 +71,9 @@ subprocess.run(["bash", dns_fetch_path], check=True)
 print("dns_fetch.sh script executed.")
 
 # Build cron job string: run every 3 hours
-cron_job = f"0 */3 * * * bash {os.path.dirname(os.path.abspath(__file__))}/dns_fetch.sh"
-
-# Install into root's crontab
-subprocess.run(f'(sudo crontab -l 2>/dev/null; echo "{cron_job}") | sudo crontab -', shell=True, check=True)
-print("Cron job for dns_fetch.sh added.")
+cron_job = f"0 */3 * * * bash {Path(__file__).resolve().parent}/dns_fetch.sh # openvpn_server suricata dns_fetch"
+install_cron_line(cron_job)
+print("Cron job for dns_fetch.sh ensured.")
 
 
 subprocess.run(["systemctl", "daemon-reload"], check=True)
